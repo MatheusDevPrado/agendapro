@@ -449,6 +449,20 @@ a:focus-visible {
   margin-top: auto;
 }
 
+.footer {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.footer strong {
+  color: var(--ink);
+}
+
 .modal {
   width: min(520px, calc(100vw - 28px));
   border: 0;
@@ -536,7 +550,8 @@ label {
   }
 
   .topbar,
-  .section-heading {
+  .section-heading,
+  .footer {
     align-items: stretch;
     flex-direction: column;
   }

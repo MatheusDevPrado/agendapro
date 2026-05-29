@@ -2,6 +2,8 @@
 
 Agenda simples para pequenos negocios: manicure, barbeiro, personal, terapeuta, dentista pequeno e professor particular.
 
+Produto criado por MatheusDevPrado.
+
 ## O que ja funciona
 
 - Agenda de atendimentos
