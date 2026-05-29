@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgendaPro - Agenda inteligente para pequenos negócios</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Navegacao principal">
+      <a class="brand" href="#agenda" aria-label="AgendaPro">
+        <span class="brand-mark">A</span>
+        <span>
+          <strong>AgendaPro</strong>
+          <small>Negocios locais</small>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Secoes">
+        <button class="nav-button active" data-view="agenda" type="button" aria-label="Agenda">
+          <span class="icon">□</span>
+          <span>Agenda</span>
+        </button>
+        <button class="nav-button" data-view="clientes" type="button" aria-label="Clientes">
+          <span class="icon">◇</span>
+          <span>Clientes</span>
+        </button>
+        <button class="nav-button" data-view="pagamentos" type="button" aria-label="Pagamentos">
+          <span class="icon">$</span>
+          <span>Pagamentos</span>
+        </button>
+        <button class="nav-button" data-view="planos" type="button" aria-label="Planos">
+          <span class="icon">★</span>
+          <span>Planos</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-panel">
+        <span class="panel-label">Plano atual</span>
+        <strong>Teste gratuito</strong>
+        <p>7 dias para validar com seus primeiros clientes.</p>
+      </div>
+    </aside>
+
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Agenda inteligente</p>
+          <h1>Controle horarios, clientes e pagamentos em um lugar.</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-button" id="exportButton" type="button" aria-label="Exportar resumo" title="Exportar resumo">
+            ⇩
+          </button>
+          <button class="primary-action" data-open-modal type="button">Novo horario</button>
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Resumo do negocio">
+        <article class="metric">
+          <span>Hoje</span>
+          <strong id="todayCount">0</strong>
+          <small>atendimentos</small>
+        </article>
+        <article class="metric">
+          <span>Receber</span>
+          <strong id="pendingTotal">R$ 0</strong>
+          <small>pagamentos pendentes</small>
+        </article>
+        <article class="metric">
+          <span>Clientes</span>
+          <strong id="clientCount">0</strong>
+          <small>ativos</small>
+        </article>
+        <article class="metric">
+          <span>WhatsApp</span>
+          <strong id="reminderCount">0</strong>
+          <small>lembretes prontos</small>
+        </article>
+      </section>
+
+      <section class="view active" id="agenda">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Operacao diaria</p>
+            <h2>Agenda da semana</h2>
+          </div>
+          <div class="segmented-control" aria-label="Filtro da agenda">
+            <button class="segment active" data-filter="all" type="button">Todos</button>
+            <button class="segment" data-filter="today" type="button">Hoje</button>
+            <button class="segment" data-filter="pending" type="button">A receber</button>
+          </div>
+        </div>
+        <div class="schedule-grid" id="scheduleList"></div>
+      </section>
+
+      <section class="view" id="clientes">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Relacionamento</p>
+            <h2>Cadastro de clientes</h2>
+          </div>
+          <form class="inline-form" id="clientForm">
+            <input id="clientName" name="clientName" type="text" placeholder="Nome do cliente" required />
+            <input id="clientPhone" name="clientPhone" type="tel" placeholder="WhatsApp" required />
+            <button class="primary-action" type="submit">Adicionar</button>
+          </form>
+        </div>
+        <div class="client-table" id="clientList"></div>
+      </section>
+
+      <section class="view" id="pagamentos">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Financeiro simples</p>
+            <h2>Pagamentos pendentes</h2>
+          </div>
+          <p class="muted">Marque como pago quando o cliente quitar o atendimento.</p>
+        </div>
+        <div class="payment-list" id="paymentList"></div>
+      </section>
+
+      <section class="view" id="planos">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Monetizacao</p>
+            <h2>Planos de assinatura</h2>
+          </div>
+        </div>
+        <div class="pricing-grid">
+          <article class="price-card">
+            <span>Essencial</span>
+            <strong>R$ 29,90</strong>
+            <small>por mes</small>
+            <p>Agenda, clientes e pagamentos para profissionais solo.</p>
+            <button type="button">Comecar</button>
+          </article>
+          <article class="price-card featured">
+            <span>Profissional</span>
+            <strong>R$ 49,90</strong>
+            <small>por mes</small>
+            <p>Lembretes por WhatsApp, relatorios e ate 3 usuarios.</p>
+            <button type="button">Assinar</button>
+          </article>
+          <article class="price-card">
+            <span>Equipe</span>
+            <strong>R$ 79,90</strong>
+            <small>por mes</small>
+            <p>Multiagenda, controle por profissional e suporte prioritario.</p>
+            <button type="button">Ver plano</button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal" id="appointmentModal">
+      <form id="appointmentForm" method="dialog">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Novo horario</p>
+            <h2>Agendar atendimento</h2>
+          </div>
+          <button class="icon-button" data-close-modal type="button" aria-label="Fechar" title="Fechar">×</button>
+        </div>
+
+        <label>
+          Cliente
+          <select id="appointmentClient" required></select>
+        </label>
+        <label>
+          Servico
+          <input id="appointmentService" type="text" placeholder="Corte, aula, consulta..." required />
+        </label>
+        <div class="field-row">
+          <label>
+            Data
+            <input id="appointmentDate" type="date" required />
+          </label>
+          <label>
+            Hora
+            <input id="appointmentTime" type="time" required />
+          </label>
+        </div>
+        <label>
+          Valor
+          <input id="appointmentPrice" type="number" min="0" step="1" placeholder="80" required />
+        </label>
+        <label class="check-row">
+          <input id="appointmentPaid" type="checkbox" />
+          <span>Cliente ja pagou</span>
+        </label>
+        <button class="primary-action full" type="submit">Salvar horario</button>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
