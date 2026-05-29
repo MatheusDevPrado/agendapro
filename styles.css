@@ -107,6 +107,11 @@ button {
   color: #ffffff;
 }
 
+.nav-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .icon {
   width: 26px;
   height: 26px;
@@ -278,6 +283,17 @@ h2 {
 
 .view.active {
   display: block;
+}
+
+.locked .topbar-actions,
+.locked .metrics,
+.locked .business-panel,
+.locked .deployment-panel,
+.locked #agenda,
+.locked #clientes,
+.locked #pagamentos,
+.locked #relatorios {
+  display: none;
 }
 
 .section-heading {

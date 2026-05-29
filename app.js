@@ -257,7 +257,10 @@ async function initializeServices() {
   currentUser = data.session && data.session.user ? data.session.user : null;
 
   if (currentUser) {
+    state.profile.loggedIn = true;
     await pullCloudState();
+    state.profile.loggedIn = true;
+    saveState();
   }
 
   renderIntegrationStatus();
@@ -270,8 +273,10 @@ function renderIntegrationStatus(message = "") {
   elements.databaseStatus.textContent = supabaseClient ? (currentUser ? "Sincronizado" : "Supabase pronto") : "Local";
 
   if (elements.authStatus) {
-    if (!supabaseClient) {
-      elements.authStatus.textContent = "Conta local - configure Supabase para login real";
+    if (!isAuthenticated()) {
+      elements.authStatus.textContent = message || "Acesso bloqueado - entre para ver o painel";
+    } else if (!supabaseClient) {
+      elements.authStatus.textContent = "Conta local ativa - configure Supabase para login real";
     } else if (currentUser) {
       elements.authStatus.textContent = `Conectado: ${currentUser.email}`;
     } else {
@@ -282,7 +287,17 @@ function renderIntegrationStatus(message = "") {
 
 async function createAccount() {
   if (!supabaseClient) {
-    alert("Configure Supabase em config.js antes de criar conta real.");
+    const credentials = getAuthCredentials();
+    if (!credentials) {
+      return;
+    }
+
+    state.profile.email = credentials.email;
+    state.profile.loggedIn = true;
+    saveState();
+    render();
+    switchView("agenda", true);
+    alert("Conta local criada. Para cliente real, configure Supabase em config.js.");
     return;
   }
 
@@ -298,14 +313,26 @@ async function createAccount() {
   }
 
   currentUser = data.user;
+  state.profile.loggedIn = true;
   await pushCloudState();
+  saveState();
   renderIntegrationStatus("Conta criada. Se o Supabase pedir confirmacao, confirme pelo e-mail.");
   alert("Conta criada. Se o Supabase estiver exigindo confirmacao, confirme pelo e-mail antes de entrar.");
 }
 
 async function loginAccount() {
   if (!supabaseClient) {
-    alert("Configure Supabase em config.js antes de entrar com conta real.");
+    const credentials = getAuthCredentials();
+    if (!credentials) {
+      return;
+    }
+
+    state.profile.email = credentials.email;
+    state.profile.loggedIn = true;
+    saveState();
+    render();
+    switchView("agenda", true);
+    alert("Acesso local liberado. Para cliente real, configure Supabase em config.js.");
     return;
   }
 
@@ -321,9 +348,13 @@ async function loginAccount() {
   }
 
   currentUser = data.user;
+  state.profile.loggedIn = true;
   await pullCloudState();
+  state.profile.loggedIn = true;
+  saveState();
   renderIntegrationStatus();
   render();
+  switchView("agenda", true);
   alert("Conta conectada e dados sincronizados.");
 }
 
@@ -434,6 +465,7 @@ function formatDate(value) {
 function render() {
   renderBusiness();
   renderProfile();
+  renderAccessState();
   renderMetrics();
   renderSchedule();
   renderClients();
@@ -472,6 +504,24 @@ function renderProfile() {
 
   document.body.classList.toggle("compact-mode", Boolean(profile.settings.compactMode));
   document.querySelector(".footer").hidden = !profile.settings.showBrand;
+}
+
+function renderAccessState() {
+  const locked = !isAuthenticated();
+  document.body.classList.toggle("locked", locked);
+  const activeView = document.querySelector(".view.active");
+  elements.navButtons.forEach((button) => {
+    const protectedView = button.dataset.view !== "perfil";
+    button.disabled = locked && protectedView;
+    button.classList.toggle("locked-item", locked && protectedView);
+  });
+  if (locked && (!activeView || activeView.id !== "perfil")) {
+    switchView("perfil");
+  }
+  elements.logoutButton.hidden = locked;
+  elements.syncCloudButton.disabled = locked || (!currentUser && Boolean(supabaseClient));
+  elements.profilePlan.textContent = locked ? "Acesso bloqueado" : "Sistema ativo";
+  renderIntegrationStatus();
 }
 
 function renderMetrics() {
@@ -857,12 +907,11 @@ function saveProfile(event) {
   state.profile.phone = phone;
   state.profile.email = email || "contato@email.com";
   state.profile.about = elements.profileAbout.value.trim();
-  state.profile.loggedIn = true;
   state.profile.settings.notifyWhatsapp = elements.notifyWhatsapp.checked;
   state.profile.settings.showBrand = elements.showBrand.checked;
   state.profile.settings.compactMode = elements.compactMode.checked;
   saveState();
-  renderProfile();
+  render();
   alert("Perfil salvo com sucesso.");
 }
 
@@ -881,17 +930,17 @@ function updateProfilePhoto(event) {
   reader.readAsDataURL(file);
 }
 
-function logoutProfile() {
+async function logoutProfile() {
   state.profile.loggedIn = false;
   if (supabaseClient) {
-    supabaseClient.auth.signOut();
+    await supabaseClient.auth.signOut();
     currentUser = null;
     renderIntegrationStatus();
   }
   saveState();
-  renderProfile();
-  switchView("agenda");
-  alert("Voce saiu do perfil. Os dados continuam salvos neste navegador.");
+  render();
+  switchView("perfil", true);
+  alert("Voce saiu. O painel fica bloqueado ate entrar novamente.");
 }
 
 function deleteAllData() {
@@ -1026,6 +1075,13 @@ function clearReportedMonth() {
 }
 
 function switchView(view, updateHash = false) {
+  if (!isAuthenticated() && view !== "perfil") {
+    view = "perfil";
+    if (updateHash) {
+      alert("Entre na conta para acessar o painel.");
+    }
+  }
+
   elements.navButtons.forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   elements.views.forEach((item) => item.classList.toggle("active", item.id === view));
   if (updateHash) {
@@ -1043,6 +1099,10 @@ function openInitialView() {
   if (exists) {
     switchView(view);
   }
+}
+
+function isAuthenticated() {
+  return Boolean(currentUser || state.profile.loggedIn);
 }
 
 function sortByDateTime(a, b) {
