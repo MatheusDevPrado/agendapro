@@ -33,7 +33,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -190,8 +191,30 @@ h2 {
   flex-shrink: 0;
 }
 
-.primary-action,
-.price-card button {
+.business-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.9fr);
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 26px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow);
+}
+
+.business-panel p {
+  margin-bottom: 0;
+}
+
+.business-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px auto;
+  gap: 8px;
+}
+
+.primary-action {
   min-height: 44px;
   border: 0;
   border-radius: 8px;
@@ -202,8 +225,7 @@ h2 {
   box-shadow: 0 10px 22px rgba(14, 122, 95, 0.22);
 }
 
-.primary-action:hover,
-.price-card button:hover {
+.primary-action:hover {
   background: var(--accent-dark);
 }
 
@@ -313,7 +335,7 @@ h2 {
 }
 
 .payment-row {
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto auto;
 }
 
 .date-pill {
@@ -362,6 +384,22 @@ h2 {
   color: #0a6049;
 }
 
+.status.canceled {
+  background: #f4e1e4;
+  color: #8a2432;
+}
+
+.appointment.canceled {
+  opacity: 0.72;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .whatsapp-link,
 .text-button {
   border: 1px solid var(--line);
@@ -383,14 +421,24 @@ h2 {
   color: var(--accent-dark);
 }
 
+.text-button.danger {
+  color: #9b2434;
+}
+
+.text-button.danger:hover {
+  border-color: #b54d5b;
+  color: #7d1b29;
+}
+
 .inline-form {
   display: grid;
-  grid-template-columns: 170px 150px auto;
+  grid-template-columns: 170px 150px minmax(160px, 1fr) auto;
   gap: 8px;
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--line);
@@ -400,53 +448,126 @@ select {
   color: var(--ink);
 }
 
+textarea {
+  min-height: 118px;
+  padding-top: 12px;
+  resize: vertical;
+}
+
 input:focus,
 select:focus,
+textarea:focus,
 button:focus-visible,
 a:focus-visible {
   outline: 3px solid rgba(14, 122, 95, 0.24);
   outline-offset: 2px;
 }
 
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+.search-input {
+  max-width: 280px;
 }
 
-.price-card {
-  min-height: 310px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 22px;
+.search-input.wide {
+  width: min(100%, 520px);
+  max-width: none;
+  margin: 0 0 14px;
+}
+
+.deployment-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.deployment-item {
+  min-height: 136px;
+  padding: 18px;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--panel);
-  border: 1px solid var(--line);
   box-shadow: var(--shadow);
 }
 
-.price-card.featured {
-  border-color: var(--accent);
-  box-shadow: 0 22px 50px rgba(14, 122, 95, 0.18);
-}
-
-.price-card span {
+.deployment-item span,
+.deployment-item small {
   color: var(--muted);
-  font-weight: 800;
 }
 
-.price-card strong {
-  font-size: 2.3rem;
+.deployment-item strong {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 1.2rem;
 }
 
-.price-card p {
+.deployment-item.done {
+  border-color: rgba(14, 122, 95, 0.38);
+  background: #f0faf6;
+}
+
+.deployment-item.pending {
+  border-color: rgba(216, 155, 43, 0.42);
+  background: #fffaf0;
+}
+
+.report-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.report-actions input {
+  width: 160px;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.report-card {
+  min-height: 132px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.report-card span,
+.report-card small {
   color: var(--muted);
-  line-height: 1.55;
 }
 
-.price-card button {
-  margin-top: auto;
+.report-card strong {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 1.35rem;
+}
+
+.report-table {
+  display: grid;
+  gap: 8px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.1fr 1fr 0.8fr 0.9fr;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.table-head {
+  background: #e8f4ef;
+  color: var(--accent-dark);
+  font-weight: 900;
 }
 
 .footer {
@@ -461,6 +582,157 @@ a:focus-visible {
 
 .footer strong {
   color: var(--ink);
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.profile-card,
+.profile-form,
+.settings-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.profile-card {
+  min-height: 360px;
+  padding: 22px;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.avatar-preview {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: #e8f4ef;
+  color: var(--accent-dark);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 2.4rem;
+  font-weight: 900;
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 28px rgba(22, 34, 29, 0.14);
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-upload {
+  width: fit-content;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.photo-upload input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.profile-card h3,
+.profile-card p {
+  margin-bottom: 0;
+}
+
+.profile-card p {
+  color: var(--muted);
+}
+
+.profile-badge {
+  border-radius: 999px;
+  background: #dff5ee;
+  color: #0a6049;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.profile-form {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profile-form > div,
+.profile-form label:nth-of-type(4),
+.settings-box,
+.profile-form .full {
+  grid-column: 1 / -1;
+}
+
+.settings-box {
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  box-shadow: none;
+  background: #f7faf7;
+}
+
+.auth-box {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.auth-box strong {
+  color: var(--ink);
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.auth-grid .full {
+  grid-column: 1 / -1;
+}
+
+.setting-row {
+  min-height: 38px;
+  color: var(--ink);
+}
+
+.compact-mode .metric {
+  min-height: 104px;
+}
+
+.compact-mode .appointment,
+.compact-mode .client-row,
+.compact-mode .payment-row {
+  padding: 12px;
 }
 
 .modal {
@@ -508,6 +780,20 @@ label {
   min-height: auto;
 }
 
+.modal-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+
+.modal-actions .full {
+  width: 100%;
+}
+
+.modal-actions .danger[hidden] {
+  display: none;
+}
+
 .empty-state {
   padding: 22px;
   border: 1px dashed var(--line);
@@ -533,7 +819,7 @@ label {
   }
 
   .nav {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -551,7 +837,9 @@ label {
 
   .topbar,
   .section-heading,
-  .footer {
+  .footer,
+  .profile-actions,
+  .report-actions {
     align-items: stretch;
     flex-direction: column;
   }
@@ -562,14 +850,25 @@ label {
   }
 
   .metrics,
-  .pricing-grid {
+  .deployment-panel,
+  .report-grid,
+  .business-panel,
+  .business-form,
+  .profile-layout,
+  .profile-form {
     grid-template-columns: 1fr;
   }
 
   .appointment,
   .client-row,
-  .payment-row {
+  .payment-row,
+  .auth-grid,
+  .table-row {
     grid-template-columns: 1fr;
+  }
+
+  .report-actions input {
+    width: 100%;
   }
 
   .date-pill {
@@ -577,15 +876,20 @@ label {
   }
 
   .inline-form,
-  .field-row {
+  .field-row,
+  .modal-actions {
     grid-template-columns: 1fr;
     flex-direction: column;
+  }
+
+  .search-input {
+    max-width: none;
   }
 }
 
 @media (min-width: 901px) and (max-width: 1120px) {
   .metrics,
-  .pricing-grid {
+  .deployment-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

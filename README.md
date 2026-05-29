@@ -1,23 +1,22 @@
 # AgendaPro
 
-Agenda simples para pequenos negocios: manicure, barbeiro, personal, terapeuta, dentista pequeno e professor particular.
+Sistema web app para saloes controlarem agenda, clientes, pagamentos, lembretes por WhatsApp, perfil e relatorios.
 
 Produto criado por MatheusDevPrado.
 
 ## O que ja funciona
 
 - Agenda de atendimentos
-- Cadastro de clientes
+- Cadastro e busca de clientes
 - Controle de pagamentos pendentes
-- Link de lembrete por WhatsApp
-- Planos de assinatura
-- Dados salvos no navegador do usuario
+- Link de cobranca e lembrete por WhatsApp
+- Relatorio mensal com download CSV
+- Perfil editavel com foto, telefone, e-mail e configuracoes
+- Modo local com `localStorage`
+- Login/sincronizacao no Supabase quando configurado
+- Endpoint seguro para criar link de pagamento no Mercado Pago
 
 ## Como abrir no computador
-
-Abra o arquivo `index.html` no navegador.
-
-Tambem da para rodar com um servidor local:
 
 ```bash
 python3 -m http.server 4173
@@ -29,30 +28,33 @@ Depois acesse:
 http://localhost:4173
 ```
 
-## Como publicar rapido
+## Configuracao para producao
 
-Este projeto e um site estatico. Pode ser publicado em:
+Edite `config.js` com os dados publicos do cliente:
 
-- Vercel
-- Netlify
-- GitHub Pages
+```js
+window.AGENDAPRO_CONFIG = {
+  productionDomain: "https://agenda.nomedosalao.com.br",
+  apiBaseUrl: "",
+  paymentProvider: "mercadopago",
+  supabaseUrl: "https://SEU-PROJETO.supabase.co",
+  supabaseAnonKey: "SUA_CHAVE_ANON_PUBLICA"
+};
+```
 
-Para comecar vendendo, a forma mais simples e criar links de pagamento no Mercado Pago ou Stripe e colocar esses links nos botoes dos planos.
+No Supabase, rode o SQL de `supabase/schema.sql`.
 
-## Proximos passos profissionais
+Na Vercel, configure as variaveis de ambiente:
 
-Para virar um SaaS completo com assinatura real:
+```text
+MERCADO_PAGO_ACCESS_TOKEN=APP_USR...
+MERCADO_PAGO_WEBHOOK_URL=https://seu-dominio.com/api/mercadopago-webhook
+PUBLIC_APP_URL=https://seu-dominio.com
+```
 
-- Login de usuarios
-- Banco de dados online
-- Pagamento recorrente
-- Controle de plano ativo
-- Lembretes automaticos
-- Painel administrativo
+## Observacoes importantes
 
-Uma stack simples para isso:
-
-- Frontend: React ou Next.js
-- Banco/login: Supabase
-- Pagamento: Mercado Pago ou Stripe
-- Hospedagem: Vercel
+- `supabaseAnonKey` pode ficar no front porque e uma chave publica protegida por RLS.
+- `MERCADO_PAGO_ACCESS_TOKEN` nunca deve ficar no front. Ele fica apenas na Vercel.
+- WhatsApp atual abre mensagem pronta via `wa.me`. Envio automatico exige API oficial ou provedor externo.
+- O webhook do Mercado Pago ja existe como base, mas precisa ser ligado ao banco para marcar pagamentos automaticamente em producao.

@@ -29,16 +29,20 @@
           <span class="icon">$</span>
           <span>Pagamentos</span>
         </button>
-        <button class="nav-button" data-view="planos" type="button" aria-label="Planos">
-          <span class="icon">★</span>
-          <span>Planos</span>
+        <button class="nav-button" data-view="relatorios" type="button" aria-label="Relatorios">
+          <span class="icon">⇩</span>
+          <span>Relatorios</span>
+        </button>
+        <button class="nav-button" data-view="perfil" type="button" aria-label="Perfil">
+          <span class="icon">○</span>
+          <span>Perfil</span>
         </button>
       </nav>
 
       <div class="sidebar-panel">
-        <span class="panel-label">Plano atual</span>
-        <strong>Teste gratuito</strong>
-        <p>7 dias para validar com seus primeiros clientes.</p>
+        <span class="panel-label">Status</span>
+        <strong>Sistema pronto</strong>
+        <p>Aguardando dominio e APIs externas para publicar em producao.</p>
       </div>
     </aside>
 
@@ -46,7 +50,7 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">Agenda inteligente</p>
-          <h1>Controle horarios, clientes e pagamentos em um lugar.</h1>
+          <h1>Agenda, clientes e pagamentos prontos para o salao operar.</h1>
         </div>
         <div class="topbar-actions">
           <button class="icon-button" id="exportButton" type="button" aria-label="Exportar resumo" title="Exportar resumo">
@@ -79,16 +83,54 @@
         </article>
       </section>
 
+      <section class="business-panel" aria-label="Configuracoes do negocio">
+        <div>
+          <p class="eyebrow">Seu negocio</p>
+          <h2 id="businessTitle">AgendaPro</h2>
+          <p class="muted">Personalize a agenda com a marca do salao antes de conectar dominio e APIs.</p>
+        </div>
+        <form class="business-form" id="businessForm">
+          <input id="businessName" type="text" placeholder="Nome do negocio" />
+          <input id="businessPhone" type="tel" placeholder="WhatsApp do negocio" />
+          <button class="text-button" type="submit">Salvar marca</button>
+        </form>
+      </section>
+
+      <section class="deployment-panel" aria-label="Status de implantacao">
+        <article class="deployment-item done">
+          <span>Sistema</span>
+          <strong>Pronto para uso</strong>
+          <small>Agenda, clientes, pagamentos, relatorios e perfil configurados.</small>
+        </article>
+        <article class="deployment-item pending">
+          <span>Dominio</span>
+          <strong id="domainStatus">Aguardando</strong>
+          <small>Conectar o endereco oficial do salao antes de publicar.</small>
+        </article>
+        <article class="deployment-item pending">
+          <span>Pagamentos</span>
+          <strong id="paymentApiStatus">API pendente</strong>
+          <small>Mercado Pago, Stripe ou outro provedor pago pelo cliente.</small>
+        </article>
+        <article class="deployment-item pending">
+          <span>Banco/Login</span>
+          <strong id="databaseStatus">Local</strong>
+          <small>Supabase sincroniza os dados quando as chaves forem configuradas.</small>
+        </article>
+      </section>
+
       <section class="view active" id="agenda">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Operacao diaria</p>
             <h2>Agenda da semana</h2>
           </div>
+          <input class="search-input" id="scheduleSearch" type="search" placeholder="Buscar cliente ou servico" />
           <div class="segmented-control" aria-label="Filtro da agenda">
             <button class="segment active" data-filter="all" type="button">Todos</button>
             <button class="segment" data-filter="today" type="button">Hoje</button>
             <button class="segment" data-filter="pending" type="button">A receber</button>
+            <button class="segment" data-filter="canceled" type="button">Cancelados</button>
           </div>
         </div>
         <div class="schedule-grid" id="scheduleList"></div>
@@ -103,9 +145,11 @@
           <form class="inline-form" id="clientForm">
             <input id="clientName" name="clientName" type="text" placeholder="Nome do cliente" required />
             <input id="clientPhone" name="clientPhone" type="tel" placeholder="WhatsApp" required />
+            <input id="clientTag" name="clientTag" type="text" placeholder="Perfil: VIP, recorrente..." />
             <button class="primary-action" type="submit">Adicionar</button>
           </form>
         </div>
+        <input class="search-input wide" id="clientSearch" type="search" placeholder="Buscar cliente por nome, telefone ou perfil" />
         <div class="client-table" id="clientList"></div>
       </section>
 
@@ -120,35 +164,96 @@
         <div class="payment-list" id="paymentList"></div>
       </section>
 
-      <section class="view" id="planos">
+      <section class="view" id="relatorios">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Monetizacao</p>
-            <h2>Planos de assinatura</h2>
+            <p class="eyebrow">Fechamento mensal</p>
+            <h2>Relatorio de pagamentos</h2>
+          </div>
+          <div class="report-actions">
+            <input id="reportMonth" type="month" />
+            <button class="text-button" id="downloadReport" type="button">Baixar CSV</button>
+            <button class="text-button danger" id="clearReportMonth" type="button">Limpar mes baixado</button>
           </div>
         </div>
-        <div class="pricing-grid">
-          <article class="price-card">
-            <span>Essencial</span>
-            <strong>R$ 29,90</strong>
-            <small>por mes</small>
-            <p>Agenda, clientes e pagamentos para profissionais solo.</p>
-            <button type="button">Comecar</button>
-          </article>
-          <article class="price-card featured">
-            <span>Profissional</span>
-            <strong>R$ 49,90</strong>
-            <small>por mes</small>
-            <p>Lembretes por WhatsApp, relatorios e ate 3 usuarios.</p>
-            <button type="button">Assinar</button>
-          </article>
-          <article class="price-card">
-            <span>Equipe</span>
-            <strong>R$ 79,90</strong>
-            <small>por mes</small>
-            <p>Multiagenda, controle por profissional e suporte prioritario.</p>
-            <button type="button">Ver plano</button>
-          </article>
+        <div class="report-grid" id="reportSummary"></div>
+        <div class="report-table" id="reportTable"></div>
+      </section>
+
+      <section class="view" id="perfil">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Conta e configuracoes</p>
+            <h2>Perfil profissional</h2>
+          </div>
+          <div class="profile-actions">
+            <button class="text-button" id="logoutButton" type="button">Sair</button>
+            <button class="text-button danger" id="deleteAccountButton" type="button">Excluir dados</button>
+          </div>
+        </div>
+
+        <div class="profile-layout">
+          <section class="profile-card" aria-label="Foto e resumo do perfil">
+            <div class="avatar-preview" id="avatarPreview">M</div>
+            <label class="photo-upload">
+              Alterar foto
+              <input id="profilePhoto" type="file" accept="image/*" />
+            </label>
+            <h3 id="profileDisplayName">MatheusDevPrado</h3>
+            <p id="profileDisplayEmail">contato@email.com</p>
+            <span class="profile-badge" id="profilePlan">Sistema ativo</span>
+          </section>
+
+          <form class="profile-form" id="profileForm">
+            <div>
+              <p class="eyebrow">Informacoes pessoais</p>
+              <h3>Dados de contato</h3>
+            </div>
+            <label>
+              Nome
+              <input id="profileName" type="text" placeholder="Seu nome" />
+            </label>
+            <label>
+              Telefone
+              <input id="profilePhone" type="tel" placeholder="WhatsApp pessoal" />
+            </label>
+            <label>
+              E-mail
+              <input id="profileEmail" type="email" placeholder="seu@email.com" />
+            </label>
+            <label>
+              Sobre
+              <textarea id="profileAbout" placeholder="Fale sobre voce, seu negocio ou atendimento"></textarea>
+            </label>
+
+            <div class="settings-box">
+              <p class="eyebrow">Configuracoes</p>
+              <div class="auth-box">
+                <strong id="authStatus">Conta local</strong>
+                <div class="auth-grid">
+                  <input id="authEmail" type="email" placeholder="E-mail de acesso" />
+                  <input id="authPassword" type="password" placeholder="Senha" minlength="6" />
+                  <button class="text-button" id="loginButton" type="button">Entrar</button>
+                  <button class="text-button" id="createAccountButton" type="button">Criar conta</button>
+                  <button class="text-button full" id="syncCloudButton" type="button">Sincronizar nuvem</button>
+                </div>
+              </div>
+              <label class="check-row setting-row">
+                <input id="notifyWhatsapp" type="checkbox" />
+                <span>Receber lembretes pelo WhatsApp</span>
+              </label>
+              <label class="check-row setting-row">
+                <input id="showBrand" type="checkbox" />
+                <span>Mostrar marca MatheusDevPrado no app</span>
+              </label>
+              <label class="check-row setting-row">
+                <input id="compactMode" type="checkbox" />
+                <span>Usar visual compacto para atendimento diario</span>
+              </label>
+            </div>
+
+            <button class="primary-action full" type="submit">Salvar perfil</button>
+          </form>
         </div>
       </section>
 
@@ -160,10 +265,11 @@
 
     <dialog class="modal" id="appointmentModal">
       <form id="appointmentForm" method="dialog">
+        <input id="appointmentId" type="hidden" />
         <div class="modal-header">
           <div>
             <p class="eyebrow">Novo horario</p>
-            <h2>Agendar atendimento</h2>
+            <h2 id="appointmentModalTitle">Agendar atendimento</h2>
           </div>
           <button class="icon-button" data-close-modal type="button" aria-label="Fechar" title="Fechar">×</button>
         </div>
@@ -175,6 +281,10 @@
         <label>
           Servico
           <input id="appointmentService" type="text" placeholder="Corte, aula, consulta..." required />
+        </label>
+        <label>
+          Profissional
+          <input id="appointmentProfessional" type="text" placeholder="Cabeleireiro(a), barbeiro(a)..." required />
         </label>
         <div class="field-row">
           <label>
@@ -190,14 +300,42 @@
           Valor
           <input id="appointmentPrice" type="number" min="0" step="1" placeholder="80" required />
         </label>
+        <label>
+          Status
+          <select id="appointmentStatus">
+            <option value="scheduled">Agendado</option>
+            <option value="completed">Concluido</option>
+            <option value="canceled">Cancelado</option>
+          </select>
+        </label>
+        <div class="field-row">
+          <label>
+            Forma de pagamento
+            <select id="appointmentPaymentMethod">
+              <option value="">Nao informado</option>
+              <option value="pix">Pix</option>
+              <option value="card">Cartao</option>
+              <option value="cash">Dinheiro</option>
+            </select>
+          </label>
+          <label>
+            ID/Comprovante
+            <input id="appointmentTransactionId" type="text" placeholder="Pix, NSU, recibo..." />
+          </label>
+        </div>
         <label class="check-row">
           <input id="appointmentPaid" type="checkbox" />
           <span>Cliente ja pagou</span>
         </label>
-        <button class="primary-action full" type="submit">Salvar horario</button>
+        <div class="modal-actions">
+          <button class="text-button danger" id="deleteAppointment" type="button">Excluir</button>
+          <button class="primary-action full" type="submit">Salvar horario</button>
+        </div>
       </form>
     </dialog>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
