@@ -16,13 +16,20 @@ const initialState = {
     about: "Agenda inteligente para pequenos negocios brasileiros.",
     photo: "",
     plan: "Sistema ativo",
-    loggedIn: true,
+    loggedIn: false,
     settings: {
       notifyWhatsapp: true,
       showBrand: true,
       compactMode: false
     }
   },
+  accounts: [
+    {
+      name: "MatheusDevPrado",
+      email: "contato@email.com",
+      password: "123456"
+    }
+  ],
   clients: [
     { id: crypto.randomUUID(), name: "Ana Paula", phone: "5511999991111", tag: "Manicure recorrente" },
     { id: crypto.randomUUID(), name: "Carlos Mendes", phone: "5511988882222", tag: "Barbearia" },
@@ -207,9 +214,12 @@ function normalizeState(value) {
         ...((value.profile && value.profile.settings) || {})
       }
     },
+    accounts: Array.isArray(value.accounts) && value.accounts.length ? value.accounts : structuredClone(initialState.accounts),
     clients: Array.isArray(value.clients) ? value.clients : [],
     appointments: Array.isArray(value.appointments) ? value.appointments : []
   };
+
+  normalized.profile.loggedIn = Boolean(value.profile && value.profile.loggedIn && currentUser);
 
   normalized.clients = normalized.clients.map((client) => ({
     id: client.id || crypto.randomUUID(),
@@ -217,6 +227,12 @@ function normalizeState(value) {
     phone: onlyDigits(client.phone || ""),
     tag: client.tag || "Cliente ativo"
   }));
+
+  normalized.accounts = normalized.accounts.map((account) => ({
+    name: account.name || "Usuario",
+    email: String(account.email || "").trim().toLowerCase(),
+    password: String(account.password || "")
+  })).filter((account) => account.email && account.password);
 
   normalized.appointments = normalized.appointments.map((appointment) => ({
     id: appointment.id || crypto.randomUUID(),
@@ -274,7 +290,7 @@ function renderIntegrationStatus(message = "") {
 
   if (elements.authStatus) {
     if (!isAuthenticated()) {
-      elements.authStatus.textContent = message || "Acesso bloqueado - entre para ver o painel";
+      elements.authStatus.textContent = message || "Acesso bloqueado - entre com contato@email.com / 123456";
     } else if (!supabaseClient) {
       elements.authStatus.textContent = "Conta local ativa - configure Supabase para login real";
     } else if (currentUser) {
@@ -292,7 +308,18 @@ async function createAccount() {
       return;
     }
 
+    const accountExists = state.accounts.some((item) => item.email === credentials.email);
+    if (accountExists) {
+      alert("Ja existe uma conta local com este e-mail. Use Entrar.");
+      return;
+    }
+
     state.profile.email = credentials.email;
+    state.accounts.push({
+      name: credentials.email.split("@")[0],
+      email: credentials.email,
+      password: credentials.password
+    });
     state.profile.loggedIn = true;
     saveState();
     render();
@@ -327,7 +354,17 @@ async function loginAccount() {
       return;
     }
 
-    state.profile.email = credentials.email;
+    const account = state.accounts.find((item) => (
+      item.email === credentials.email && item.password === credentials.password
+    ));
+
+    if (!account) {
+      alert("E-mail ou senha invalidos. Use a conta salva ou crie uma nova conta.");
+      return;
+    }
+
+    state.profile.name = account.name || state.profile.name;
+    state.profile.email = account.email;
     state.profile.loggedIn = true;
     saveState();
     render();
@@ -370,7 +407,7 @@ async function syncCloudNow() {
 }
 
 function getAuthCredentials() {
-  const email = elements.authEmail.value.trim();
+  const email = elements.authEmail.value.trim().toLowerCase();
   const password = elements.authPassword.value;
 
   if (!isValidEmail(email)) {

@@ -296,6 +296,25 @@ h2 {
   display: none;
 }
 
+.locked .profile-actions,
+.locked .profile-card,
+.locked .profile-form > div:first-child,
+.locked .profile-form > label,
+.locked .settings-box > .eyebrow,
+.locked .setting-row,
+.locked .profile-form > .primary-action,
+.locked #syncCloudButton {
+  display: none;
+}
+
+.locked .profile-layout {
+  grid-template-columns: minmax(0, 520px);
+}
+
+.locked .profile-form {
+  grid-template-columns: 1fr;
+}
+
 .section-heading {
   justify-content: space-between;
   margin-bottom: 16px;
