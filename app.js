@@ -714,7 +714,7 @@ function renderPayments() {
 }
 
 function renderClientOptions() {
-  elements.appointmentClient.innerHTML = state.clients.map((client) => (
+  elements.appointmentClient.innerHTML = '<option value="">Selecione o cliente</option>' + state.clients.map((client) => (
     `<option value="${client.id}">${escapeHtml(client.name)}</option>`
   )).join("");
 }
@@ -767,10 +767,11 @@ function openAppointmentModal(appointmentId = null, clientId = null) {
 
   elements.appointmentForm.reset();
   document.querySelector("#appointmentId").value = "";
+  document.querySelector("#appointmentClient").value = "";
   document.querySelector("#appointmentDate").value = isoToday;
   document.querySelector("#appointmentStatus").value = "scheduled";
   elements.deleteAppointment.hidden = true;
-  elements.appointmentModalTitle.textContent = "Agendar atendimento";
+  elements.appointmentModalTitle.textContent = "Agendar cliente";
 
   if (clientId) {
     document.querySelector("#appointmentClient").value = clientId;
@@ -789,7 +790,7 @@ function openAppointmentModal(appointmentId = null, clientId = null) {
     document.querySelector("#appointmentDate").value = appointment.date;
     document.querySelector("#appointmentTime").value = appointment.time;
     document.querySelector("#appointmentPrice").value = appointment.price;
-    document.querySelector("#appointmentStatus").value = appointment.status;
+    document.querySelector("#appointmentStatus").value = appointment.status || "scheduled";
     document.querySelector("#appointmentPaymentMethod").value = appointment.paymentMethod;
     document.querySelector("#appointmentTransactionId").value = appointment.transactionId;
     document.querySelector("#appointmentPaid").checked = appointment.paid;
@@ -810,7 +811,7 @@ function saveAppointment(event) {
     date: document.querySelector("#appointmentDate").value,
     time: document.querySelector("#appointmentTime").value,
     price: Number(document.querySelector("#appointmentPrice").value),
-    status: document.querySelector("#appointmentStatus").value,
+    status: getAppointmentStatusForSave(appointmentId),
     paymentMethod: document.querySelector("#appointmentPaymentMethod").value,
     transactionId: document.querySelector("#appointmentTransactionId").value.trim(),
     paid: document.querySelector("#appointmentPaid").checked
@@ -834,6 +835,15 @@ function saveAppointment(event) {
   saveState();
   elements.appointmentModal.close();
   render();
+}
+
+function getAppointmentStatusForSave(appointmentId) {
+  if (!appointmentId) {
+    return "scheduled";
+  }
+
+  const appointment = state.appointments.find((item) => item.id === appointmentId);
+  return appointment ? appointment.status : "scheduled";
 }
 
 function deleteAppointment() {
@@ -1185,6 +1195,10 @@ function getSectionLink(type) {
 }
 
 function validateAppointment(payload, appointmentId) {
+  if (!payload.clientId) {
+    return { ok: false, message: "Selecione o nome do cliente para criar o agendamento." };
+  }
+
   if (!payload.service || payload.service.length < 3) {
     return { ok: false, message: "Informe o servico adquirido com pelo menos 3 caracteres." };
   }

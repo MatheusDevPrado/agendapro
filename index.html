@@ -56,7 +56,7 @@
           <button class="icon-button" id="exportButton" type="button" aria-label="Exportar resumo" title="Exportar resumo">
             ⇩
           </button>
-          <button class="primary-action" data-open-modal type="button">Novo horario</button>
+          <button class="primary-action" data-open-modal type="button">Novo agendamento</button>
         </div>
       </header>
 
@@ -268,14 +268,14 @@
         <input id="appointmentId" type="hidden" />
         <div class="modal-header">
           <div>
-            <p class="eyebrow">Novo horario</p>
-            <h2 id="appointmentModalTitle">Agendar atendimento</h2>
+            <p class="eyebrow">Novo agendamento</p>
+            <h2 id="appointmentModalTitle">Agendar cliente</h2>
           </div>
           <button class="icon-button" data-close-modal type="button" aria-label="Fechar" title="Fechar">×</button>
         </div>
 
         <label>
-          Cliente
+          Nome do cliente
           <select id="appointmentClient" required></select>
         </label>
         <label>
@@ -300,14 +300,7 @@
           Valor
           <input id="appointmentPrice" type="number" min="0" step="1" placeholder="80" required />
         </label>
-        <label>
-          Status
-          <select id="appointmentStatus">
-            <option value="scheduled">Agendado</option>
-            <option value="completed">Concluido</option>
-            <option value="canceled">Cancelado</option>
-          </select>
-        </label>
+        <input id="appointmentStatus" type="hidden" value="scheduled" />
         <div class="field-row">
           <label>
             Forma de pagamento
