@@ -30,6 +30,16 @@ const initialState = {
       password: "123456"
     }
   ],
+  services: [
+    { id: crypto.randomUUID(), name: "Manicure completa", duration: 60, price: 85 },
+    { id: crypto.randomUUID(), name: "Corte e barba", duration: 45, price: 70 },
+    { id: crypto.randomUUID(), name: "Escova modelada", duration: 50, price: 95 }
+  ],
+  professionals: [
+    { id: crypto.randomUUID(), name: "Juliana", role: "Manicure", commission: 40 },
+    { id: crypto.randomUUID(), name: "Rafael", role: "Barbeiro", commission: 45 },
+    { id: crypto.randomUUID(), name: "Marina", role: "Cabeleireira", commission: 40 }
+  ],
   clients: [
     { id: crypto.randomUUID(), name: "Ana Paula", phone: "5511999991111", tag: "Manicure recorrente" },
     { id: crypto.randomUUID(), name: "Carlos Mendes", phone: "5511988882222", tag: "Barbearia" },
@@ -70,11 +80,11 @@ initialState.appointments = [
   {
     id: crypto.randomUUID(),
     clientId: initialState.clients[2].id,
-    service: "Aula particular",
+    service: "Escova modelada",
     professional: "Marina",
     date: addDays(1),
     time: "17:00",
-    price: 120,
+    price: 95,
     paid: false,
     status: "scheduled",
     paymentMethod: "",
@@ -100,6 +110,16 @@ const elements = {
   clientList: document.querySelector("#clientList"),
   paymentList: document.querySelector("#paymentList"),
   clientForm: document.querySelector("#clientForm"),
+  serviceForm: document.querySelector("#serviceForm"),
+  serviceList: document.querySelector("#serviceList"),
+  serviceName: document.querySelector("#serviceName"),
+  serviceDuration: document.querySelector("#serviceDuration"),
+  servicePrice: document.querySelector("#servicePrice"),
+  professionalForm: document.querySelector("#professionalForm"),
+  professionalList: document.querySelector("#professionalList"),
+  professionalName: document.querySelector("#professionalName"),
+  professionalRole: document.querySelector("#professionalRole"),
+  professionalCommission: document.querySelector("#professionalCommission"),
   appointmentForm: document.querySelector("#appointmentForm"),
   appointmentClient: document.querySelector("#appointmentClient"),
   appointmentModal: document.querySelector("#appointmentModal"),
@@ -150,6 +170,8 @@ const elements = {
 document.querySelector("[data-open-modal]").addEventListener("click", () => openAppointmentModal());
 document.querySelector("[data-close-modal]").addEventListener("click", () => elements.appointmentModal.close());
 elements.clientForm.addEventListener("submit", addClient);
+elements.serviceForm.addEventListener("submit", addService);
+elements.professionalForm.addEventListener("submit", addProfessional);
 elements.appointmentForm.addEventListener("submit", saveAppointment);
 elements.businessForm.addEventListener("submit", saveBusiness);
 elements.profileForm.addEventListener("submit", saveProfile);
@@ -164,6 +186,7 @@ elements.downloadReport.addEventListener("click", downloadMonthlyReport);
 elements.clearReportMonth.addEventListener("click", clearReportedMonth);
 elements.exportButton.addEventListener("click", exportSummary);
 elements.deleteAppointment.addEventListener("click", deleteAppointment);
+document.querySelector("#appointmentService").addEventListener("change", applyServiceDefaults);
 elements.scheduleSearch.addEventListener("input", (event) => {
   scheduleSearch = event.target.value.trim().toLowerCase();
   renderSchedule();
@@ -215,6 +238,8 @@ function normalizeState(value) {
       }
     },
     accounts: Array.isArray(value.accounts) && value.accounts.length ? value.accounts : structuredClone(initialState.accounts),
+    services: Array.isArray(value.services) && value.services.length ? value.services : structuredClone(initialState.services),
+    professionals: Array.isArray(value.professionals) && value.professionals.length ? value.professionals : structuredClone(initialState.professionals),
     clients: Array.isArray(value.clients) ? value.clients : [],
     appointments: Array.isArray(value.appointments) ? value.appointments : []
   };
@@ -234,6 +259,20 @@ function normalizeState(value) {
     password: String(account.password || "")
   })).filter((account) => account.email && account.password);
 
+  normalized.services = normalized.services.map((service) => ({
+    id: service.id || crypto.randomUUID(),
+    name: service.name || "Servico",
+    duration: Number(service.duration || 30),
+    price: Number(service.price || 0)
+  })).filter((service) => service.name && service.duration > 0);
+
+  normalized.professionals = normalized.professionals.map((professional) => ({
+    id: professional.id || crypto.randomUUID(),
+    name: professional.name || "Profissional",
+    role: professional.role || "Atendimento",
+    commission: Number(professional.commission || 0)
+  })).filter((professional) => professional.name);
+
   normalized.appointments = normalized.appointments.map((appointment) => ({
     id: appointment.id || crypto.randomUUID(),
     clientId: appointment.clientId,
@@ -248,6 +287,28 @@ function normalizeState(value) {
     transactionId: appointment.transactionId || "",
     paidAt: appointment.paidAt || (appointment.paid ? appointment.date || isoToday : "")
   }));
+
+  normalized.appointments.forEach((appointment) => {
+    const serviceExists = normalized.services.some((service) => normalizeText(service.name) === normalizeText(appointment.service));
+    if (!serviceExists) {
+      normalized.services.push({
+        id: crypto.randomUUID(),
+        name: appointment.service,
+        duration: 30,
+        price: Number(appointment.price || 0)
+      });
+    }
+
+    const professionalExists = normalized.professionals.some((professional) => normalizeText(professional.name) === normalizeText(appointment.professional));
+    if (!professionalExists) {
+      normalized.professionals.push({
+        id: crypto.randomUUID(),
+        name: appointment.professional,
+        role: "Atendimento",
+        commission: 0
+      });
+    }
+  });
 
   return normalized;
 }
@@ -504,11 +565,13 @@ function render() {
   renderProfile();
   renderAccessState();
   renderMetrics();
+  renderCatalog();
   renderSchedule();
   renderClients();
   renderPayments();
   renderReports();
   renderClientOptions();
+  renderAppointmentOptions();
 }
 
 function renderBusiness() {
@@ -599,6 +662,7 @@ function renderSchedule() {
           <span class="status ${status.className}">${status.label}</span>
           ${appointment.status !== "canceled" && !appointment.paid ? `<a class="whatsapp-link" href="${buildWhatsAppLink(client, appointment, "reminder")}" target="_blank" rel="noreferrer">Lembrar</a>` : ""}
           ${appointment.status !== "completed" && appointment.status !== "canceled" ? `<button class="text-button" type="button" data-complete="${appointment.id}">Concluir</button>` : ""}
+          ${appointment.status !== "completed" && appointment.status !== "canceled" ? `<button class="text-button danger" type="button" data-cancel="${appointment.id}">Cancelar</button>` : ""}
           <button class="text-button" type="button" data-edit-appointment="${appointment.id}">Editar</button>
         </div>
       </article>
@@ -611,6 +675,10 @@ function renderSchedule() {
 
   document.querySelectorAll("[data-complete]").forEach((button) => {
     button.addEventListener("click", () => completeAppointment(button.dataset.complete));
+  });
+
+  document.querySelectorAll("[data-cancel]").forEach((button) => {
+    button.addEventListener("click", () => cancelAppointment(button.dataset.cancel));
   });
 }
 
@@ -676,6 +744,53 @@ function renderClients() {
   });
 }
 
+function renderCatalog() {
+  renderServices();
+  renderProfessionals();
+}
+
+function renderServices() {
+  if (!state.services.length) {
+    elements.serviceList.innerHTML = '<div class="empty-state">Cadastre o primeiro servico do salao.</div>';
+    return;
+  }
+
+  elements.serviceList.innerHTML = state.services.map((service) => `
+    <article class="catalog-row">
+      <div>
+        <h3>${escapeHtml(service.name)}</h3>
+        <p class="meta">${service.duration} min · ${currency.format(Number(service.price))}</p>
+      </div>
+      <button class="text-button danger" type="button" data-delete-service="${service.id}">Remover</button>
+    </article>
+  `).join("");
+
+  document.querySelectorAll("[data-delete-service]").forEach((button) => {
+    button.addEventListener("click", () => deleteService(button.dataset.deleteService));
+  });
+}
+
+function renderProfessionals() {
+  if (!state.professionals.length) {
+    elements.professionalList.innerHTML = '<div class="empty-state">Cadastre o primeiro profissional.</div>';
+    return;
+  }
+
+  elements.professionalList.innerHTML = state.professionals.map((professional) => `
+    <article class="catalog-row">
+      <div>
+        <h3>${escapeHtml(professional.name)}</h3>
+        <p class="meta">${escapeHtml(professional.role)} · Comissao ${Number(professional.commission || 0)}%</p>
+      </div>
+      <button class="text-button danger" type="button" data-delete-professional="${professional.id}">Remover</button>
+    </article>
+  `).join("");
+
+  document.querySelectorAll("[data-delete-professional]").forEach((button) => {
+    button.addEventListener("click", () => deleteProfessional(button.dataset.deleteProfessional));
+  });
+}
+
 function renderPayments() {
   const pending = state.appointments
     .filter((appointment) => !appointment.paid && appointment.status !== "canceled")
@@ -717,6 +832,118 @@ function renderClientOptions() {
   elements.appointmentClient.innerHTML = '<option value="">Selecione o cliente</option>' + state.clients.map((client) => (
     `<option value="${client.id}">${escapeHtml(client.name)}</option>`
   )).join("");
+}
+
+function renderAppointmentOptions() {
+  const serviceOptions = state.services.map((service) => (
+    `<option value="${escapeHtml(service.name)}" data-price="${service.price}" data-duration="${service.duration}">${escapeHtml(service.name)} · ${currency.format(Number(service.price))}</option>`
+  )).join("");
+  const professionalOptions = state.professionals.map((professional) => (
+    `<option value="${escapeHtml(professional.name)}">${escapeHtml(professional.name)} · ${escapeHtml(professional.role)}</option>`
+  )).join("");
+
+  document.querySelector("#appointmentService").innerHTML = `<option value="">Selecione o servico</option>${serviceOptions}`;
+  document.querySelector("#appointmentProfessional").innerHTML = `<option value="">Selecione o profissional</option>${professionalOptions}`;
+}
+
+function addService(event) {
+  event.preventDefault();
+  const name = elements.serviceName.value.trim();
+  const duration = Number(elements.serviceDuration.value);
+  const price = Number(elements.servicePrice.value);
+
+  if (name.length < 3) {
+    alert("Informe um servico com pelo menos 3 caracteres.");
+    return;
+  }
+
+  if (!Number.isFinite(duration) || duration < 5 || duration > 480) {
+    alert("Informe uma duracao entre 5 e 480 minutos.");
+    return;
+  }
+
+  if (!Number.isFinite(price) || price <= 0) {
+    alert("Informe um valor maior que zero para o servico.");
+    return;
+  }
+
+  const exists = state.services.some((service) => normalizeText(service.name) === normalizeText(name));
+  if (exists) {
+    alert("Este servico ja esta cadastrado.");
+    return;
+  }
+
+  state.services.push({ id: crypto.randomUUID(), name, duration, price });
+  saveState();
+  elements.serviceForm.reset();
+  render();
+}
+
+function deleteService(serviceId) {
+  const service = state.services.find((item) => item.id === serviceId);
+  if (!service) {
+    return;
+  }
+
+  const inUse = state.appointments.some((appointment) => normalizeText(appointment.service) === normalizeText(service.name));
+  if (inUse) {
+    alert("Este servico ja esta em agendamentos. Mantenha para preservar o historico.");
+    return;
+  }
+
+  state.services = state.services.filter((item) => item.id !== serviceId);
+  saveState();
+  render();
+}
+
+function addProfessional(event) {
+  event.preventDefault();
+  const name = elements.professionalName.value.trim();
+  const role = elements.professionalRole.value.trim();
+  const commission = Number(elements.professionalCommission.value || 0);
+
+  if (name.length < 2) {
+    alert("Informe o nome do profissional.");
+    return;
+  }
+
+  if (role.length < 2) {
+    alert("Informe a especialidade do profissional.");
+    return;
+  }
+
+  if (!Number.isFinite(commission) || commission < 0 || commission > 100) {
+    alert("A comissao deve ficar entre 0 e 100%.");
+    return;
+  }
+
+  const exists = state.professionals.some((professional) => normalizeText(professional.name) === normalizeText(name));
+  if (exists) {
+    alert("Este profissional ja esta cadastrado.");
+    return;
+  }
+
+  state.professionals.push({ id: crypto.randomUUID(), name, role, commission });
+  saveState();
+  elements.professionalForm.reset();
+  render();
+}
+
+function deleteProfessional(professionalId) {
+  const professional = state.professionals.find((item) => item.id === professionalId);
+  if (!professional) {
+    return;
+  }
+
+  const inUse = state.appointments.some((appointment) => normalizeText(appointment.professional) === normalizeText(professional.name));
+  if (inUse) {
+    alert("Este profissional ja possui agendamentos. Mantenha para preservar o historico.");
+    return;
+  }
+
+  state.professionals = state.professionals.filter((item) => item.id !== professionalId);
+  saveState();
+  render();
 }
 
 function addClient(event) {
@@ -761,7 +988,20 @@ function deleteClient(clientId) {
 
 function openAppointmentModal(appointmentId = null, clientId = null) {
   if (!state.clients.length) {
-    alert("Cadastre um cliente antes de criar um horario.");
+    alert("Cadastre um cliente antes de criar um agendamento.");
+    switchView("clientes", true);
+    return;
+  }
+
+  if (!state.services.length) {
+    alert("Cadastre pelo menos um servico antes de agendar.");
+    switchView("operacao", true);
+    return;
+  }
+
+  if (!state.professionals.length) {
+    alert("Cadastre pelo menos um profissional antes de agendar.");
+    switchView("operacao", true);
     return;
   }
 
@@ -799,6 +1039,19 @@ function openAppointmentModal(appointmentId = null, clientId = null) {
   }
 
   elements.appointmentModal.showModal();
+}
+
+function applyServiceDefaults() {
+  const selected = document.querySelector("#appointmentService").selectedOptions[0];
+  if (!selected) {
+    return;
+  }
+
+  const price = Number(selected.dataset.price || 0);
+  const priceInput = document.querySelector("#appointmentPrice");
+  if (price > 0 && (!priceInput.value || Number(priceInput.value) <= 0)) {
+    priceInput.value = price;
+  }
 }
 
 function saveAppointment(event) {
@@ -868,6 +1121,24 @@ function completeAppointment(appointmentId) {
   appointment.paymentMethod = appointment.paymentMethod || "pix";
   appointment.transactionId = appointment.transactionId || `MANUAL-${Date.now()}`;
   appointment.paidAt = isoToday;
+  saveState();
+  render();
+}
+
+function cancelAppointment(appointmentId) {
+  const appointment = state.appointments.find((item) => item.id === appointmentId);
+  if (!appointment) {
+    return;
+  }
+
+  const confirmed = confirm("Cancelar este agendamento? Ele continua aparecendo no filtro de cancelados e nos relatorios.");
+  if (!confirmed) {
+    return;
+  }
+
+  appointment.status = "canceled";
+  appointment.paid = false;
+  appointment.paidAt = "";
   saveState();
   render();
 }
@@ -1200,11 +1471,21 @@ function validateAppointment(payload, appointmentId) {
   }
 
   if (!payload.service || payload.service.length < 3) {
-    return { ok: false, message: "Informe o servico adquirido com pelo menos 3 caracteres." };
+    return { ok: false, message: "Selecione o servico adquirido." };
   }
 
   if (!payload.professional || payload.professional.length < 2) {
-    return { ok: false, message: "Informe o profissional responsavel pelo atendimento." };
+    return { ok: false, message: "Selecione o profissional responsavel pelo atendimento." };
+  }
+
+  const serviceExists = state.services.some((service) => normalizeText(service.name) === normalizeText(payload.service));
+  if (!serviceExists) {
+    return { ok: false, message: "Este servico nao esta cadastrado na tabela do salao." };
+  }
+
+  const professionalExists = state.professionals.some((professional) => normalizeText(professional.name) === normalizeText(payload.professional));
+  if (!professionalExists) {
+    return { ok: false, message: "Este profissional nao esta cadastrado na equipe do salao." };
   }
 
   if (!payload.date || !payload.time) {
@@ -1219,17 +1500,26 @@ function validateAppointment(payload, appointmentId) {
     return { ok: false, message: "Informe a forma de pagamento para marcar como pago." };
   }
 
-  const hasConflict = state.appointments.some((appointment) => (
-    appointment.id !== appointmentId &&
-    appointment.status !== "canceled" &&
-    payload.status !== "canceled" &&
-    appointment.date === payload.date &&
-    appointment.time === payload.time &&
-    normalizeText(appointment.professional) === normalizeText(payload.professional)
-  ));
+  const payloadStart = timeToMinutes(payload.time);
+  const payloadEnd = payloadStart + getServiceDuration(payload.service);
+  const hasConflict = state.appointments.some((appointment) => {
+    if (
+      appointment.id === appointmentId ||
+      appointment.status === "canceled" ||
+      payload.status === "canceled" ||
+      appointment.date !== payload.date ||
+      normalizeText(appointment.professional) !== normalizeText(payload.professional)
+    ) {
+      return false;
+    }
+
+    const appointmentStart = timeToMinutes(appointment.time);
+    const appointmentEnd = appointmentStart + getServiceDuration(appointment.service);
+    return payloadStart < appointmentEnd && payloadEnd > appointmentStart;
+  });
 
   if (hasConflict) {
-    return { ok: false, message: "Este profissional ja tem atendimento nesse dia e horario." };
+    return { ok: false, message: "Este profissional ja tem atendimento nesse intervalo de horario." };
   }
 
   return { ok: true };
@@ -1274,6 +1564,16 @@ function isValidEmail(email) {
 
 function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function getServiceDuration(serviceName) {
+  const service = state.services.find((item) => normalizeText(item.name) === normalizeText(serviceName));
+  return service ? Number(service.duration || 30) : 30;
+}
+
+function timeToMinutes(value) {
+  const [hours, minutes] = String(value || "00:00").split(":").map(Number);
+  return (hours * 60) + (minutes || 0);
 }
 
 function statusInfo(status, paid) {

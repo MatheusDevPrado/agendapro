@@ -21,6 +21,10 @@
           <span class="icon">□</span>
           <span>Agenda</span>
         </button>
+        <button class="nav-button" data-view="operacao" type="button" aria-label="Servicos e profissionais">
+          <span class="icon">✦</span>
+          <span>Servicos</span>
+        </button>
         <button class="nav-button" data-view="clientes" type="button" aria-label="Clientes">
           <span class="icon">◇</span>
           <span>Clientes</span>
@@ -134,6 +138,46 @@
           </div>
         </div>
         <div class="schedule-grid" id="scheduleList"></div>
+      </section>
+
+      <section class="view" id="operacao">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Base do salao</p>
+            <h2>Servicos e profissionais</h2>
+          </div>
+          <p class="muted">Cadastre a tabela do salao para evitar erro na hora de agendar.</p>
+        </div>
+
+        <div class="catalog-layout">
+          <section class="catalog-panel">
+            <div>
+              <p class="eyebrow">Servicos</p>
+              <h3>Tabela de servicos</h3>
+            </div>
+            <form class="catalog-form" id="serviceForm">
+              <input id="serviceName" type="text" placeholder="Servico: Corte feminino" required />
+              <input id="serviceDuration" type="number" min="5" step="5" placeholder="Duracao min." required />
+              <input id="servicePrice" type="number" min="1" step="1" placeholder="Valor" required />
+              <button class="primary-action" type="submit">Adicionar servico</button>
+            </form>
+            <div class="catalog-list" id="serviceList"></div>
+          </section>
+
+          <section class="catalog-panel">
+            <div>
+              <p class="eyebrow">Profissionais</p>
+              <h3>Equipe de atendimento</h3>
+            </div>
+            <form class="catalog-form" id="professionalForm">
+              <input id="professionalName" type="text" placeholder="Nome do profissional" required />
+              <input id="professionalRole" type="text" placeholder="Especialidade" required />
+              <input id="professionalCommission" type="number" min="0" max="100" step="1" placeholder="Comissao %" />
+              <button class="primary-action" type="submit">Adicionar profissional</button>
+            </form>
+            <div class="catalog-list" id="professionalList"></div>
+          </section>
+        </div>
       </section>
 
       <section class="view" id="clientes">
@@ -280,11 +324,11 @@
         </label>
         <label>
           Servico
-          <input id="appointmentService" type="text" placeholder="Corte, aula, consulta..." required />
+          <select id="appointmentService" required></select>
         </label>
         <label>
           Profissional
-          <input id="appointmentProfessional" type="text" placeholder="Cabeleireiro(a), barbeiro(a)..." required />
+          <select id="appointmentProfessional" required></select>
         </label>
         <div class="field-row">
           <label>

@@ -290,6 +290,7 @@ h2 {
 .locked .business-panel,
 .locked .deployment-panel,
 .locked #agenda,
+.locked #operacao,
 .locked #clientes,
 .locked #pagamentos,
 .locked #relatorios {
@@ -346,14 +347,16 @@ h2 {
 
 .schedule-grid,
 .payment-list,
-.client-table {
+.client-table,
+.catalog-list {
   display: grid;
   gap: 12px;
 }
 
 .appointment,
 .client-row,
-.payment-row {
+.payment-row,
+.catalog-row {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.88);
@@ -371,6 +374,42 @@ h2 {
 
 .payment-row {
   grid-template-columns: minmax(0, 1fr) auto auto auto auto auto;
+}
+
+.catalog-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.catalog-panel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow);
+}
+
+.catalog-panel h3,
+.catalog-row h3 {
+  margin: 0 0 6px;
+}
+
+.catalog-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 110px;
+  gap: 8px;
+}
+
+.catalog-form .primary-action {
+  grid-column: 1 / -1;
+}
+
+.catalog-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  box-shadow: none;
 }
 
 .date-pill {
@@ -889,6 +928,8 @@ label {
   .report-grid,
   .business-panel,
   .business-form,
+  .catalog-layout,
+  .catalog-form,
   .profile-layout,
   .profile-form {
     grid-template-columns: 1fr;
@@ -897,6 +938,7 @@ label {
   .appointment,
   .client-row,
   .payment-row,
+  .catalog-row,
   .auth-grid,
   .table-row {
     grid-template-columns: 1fr;
