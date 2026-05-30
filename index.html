@@ -189,7 +189,13 @@
           <form class="inline-form" id="clientForm">
             <input id="clientName" name="clientName" type="text" placeholder="Nome do cliente" required />
             <input id="clientPhone" name="clientPhone" type="tel" placeholder="WhatsApp" required />
-            <input id="clientTag" name="clientTag" type="text" placeholder="Perfil: VIP, recorrente..." />
+            <select id="clientTag" name="clientTag" required>
+              <option value="Cliente ativo">Cliente ativo</option>
+              <option value="VIP">VIP</option>
+              <option value="Recorrente">Recorrente</option>
+              <option value="Retorno">Retorno</option>
+              <option value="Inativo">Inativo</option>
+            </select>
             <button class="primary-action" type="submit">Adicionar</button>
           </form>
         </div>

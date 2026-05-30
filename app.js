@@ -41,9 +41,9 @@ const initialState = {
     { id: crypto.randomUUID(), name: "Marina", role: "Cabeleireira", commission: 40 }
   ],
   clients: [
-    { id: crypto.randomUUID(), name: "Ana Paula", phone: "5511999991111", tag: "Manicure recorrente" },
-    { id: crypto.randomUUID(), name: "Carlos Mendes", phone: "5511988882222", tag: "Barbearia" },
-    { id: crypto.randomUUID(), name: "Marina Costa", phone: "5511977773333", tag: "Aula semanal" }
+    { id: crypto.randomUUID(), name: "Ana Paula", phone: "5511999991111", tag: "Recorrente" },
+    { id: crypto.randomUUID(), name: "Carlos Mendes", phone: "5511988882222", tag: "VIP" },
+    { id: crypto.randomUUID(), name: "Marina Costa", phone: "5511977773333", tag: "Cliente ativo" }
   ],
   appointments: []
 };
@@ -97,6 +97,7 @@ let state = normalizeState(loadState());
 let activeFilter = "all";
 let scheduleSearch = "";
 let clientSearch = "";
+const clientProfiles = ["Cliente ativo", "VIP", "Recorrente", "Retorno", "Inativo"];
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -250,7 +251,7 @@ function normalizeState(value) {
     id: client.id || crypto.randomUUID(),
     name: client.name || "Cliente",
     phone: onlyDigits(client.phone || ""),
-    tag: client.tag || "Cliente ativo"
+    tag: normalizeClientProfile(client.tag)
   }));
 
   normalized.accounts = normalized.accounts.map((account) => ({
@@ -950,7 +951,7 @@ function addClient(event) {
   event.preventDefault();
   const name = document.querySelector("#clientName").value.trim();
   const phone = onlyDigits(document.querySelector("#clientPhone").value);
-  const tag = document.querySelector("#clientTag").value.trim() || "Cliente ativo";
+  const tag = normalizeClientProfile(document.querySelector("#clientTag").value);
 
   if (name.length < 3) {
     alert("Informe um nome de cliente com pelo menos 3 caracteres.");
@@ -1564,6 +1565,24 @@ function isValidEmail(email) {
 
 function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function normalizeClientProfile(value) {
+  const text = normalizeText(value);
+  if (text.includes("vip")) {
+    return "VIP";
+  }
+  if (text.includes("recorrente") || text.includes("recorente") || text.includes("mensal") || text.includes("semanal")) {
+    return "Recorrente";
+  }
+  if (text.includes("retorno")) {
+    return "Retorno";
+  }
+  if (text.includes("inativo") || text.includes("cancelado")) {
+    return "Inativo";
+  }
+
+  return clientProfiles.includes(value) ? value : "Cliente ativo";
 }
 
 function getServiceDuration(serviceName) {
