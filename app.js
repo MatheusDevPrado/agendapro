@@ -43,7 +43,7 @@ const initialState = {
   clients: [
     { id: crypto.randomUUID(), name: "Ana Paula", phone: "5511999991111", tag: "Recorrente" },
     { id: crypto.randomUUID(), name: "Carlos Mendes", phone: "5511988882222", tag: "VIP" },
-    { id: crypto.randomUUID(), name: "Marina Costa", phone: "5511977773333", tag: "Cliente ativo" }
+    { id: crypto.randomUUID(), name: "Marina Costa", phone: "5511977773333", tag: "Pacote mensal" }
   ],
   appointments: []
 };
@@ -97,7 +97,7 @@ let state = normalizeState(loadState());
 let activeFilter = "all";
 let scheduleSearch = "";
 let clientSearch = "";
-const clientProfiles = ["Cliente ativo", "VIP", "Recorrente", "Retorno", "Inativo"];
+const clientProfiles = ["Novo cliente", "Cliente ativo", "Recorrente", "VIP", "Pacote mensal", "Retorno agendado", "Inativo"];
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -1569,14 +1569,20 @@ function normalizeText(value) {
 
 function normalizeClientProfile(value) {
   const text = normalizeText(value);
+  if (text.includes("novo") || text.includes("primeira vez")) {
+    return "Novo cliente";
+  }
   if (text.includes("vip")) {
     return "VIP";
   }
   if (text.includes("recorrente") || text.includes("recorente") || text.includes("mensal") || text.includes("semanal")) {
     return "Recorrente";
   }
+  if (text.includes("pacote") || text.includes("assinatura") || text.includes("plano")) {
+    return "Pacote mensal";
+  }
   if (text.includes("retorno")) {
-    return "Retorno";
+    return "Retorno agendado";
   }
   if (text.includes("inativo") || text.includes("cancelado")) {
     return "Inativo";
